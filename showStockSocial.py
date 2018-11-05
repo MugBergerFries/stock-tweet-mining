@@ -3,27 +3,13 @@ import matplotlib.pyplot as plt
 import datetime
 import numpy as np
 
-def getDatabyYear(values,dates,year,weeks):
-    i = 0
-    data = [[] for _ in range(52)]
-    for item in values:
-        if dates[i][0:4]==year:
-            data[weeks[i]-1].append(item)
-        i+=1
-    averages = []
-    for l in data:
-        averages.append(np.mean(l))
-    return averages
-
 dfStocks = pd.read_csv('StockData/HistoricalQuotesTSLA.csv')
 dfTweets = pd.read_csv('ColumnTweets.csv')
 
 stockdates = []
 stockclose = []
-muskcounts12 = []
 stockdates = dfStocks['date'].tolist()
 stockclose = dfStocks['close'].tolist()
-muskcounts12 = dfTweets['2012'].tolist()
 
 stockweeks = []
 i = 0
@@ -38,20 +24,54 @@ for item in stockdates:
     
 dfStocks['week'] = stockweeks
 StockWeekList = dfStocks['week'].tolist()
-
-stocklist12 = []
-stocklist12 = getDatabyYear(stockclose,stockdates,'2012',StockWeekList)
-stocklist12len = list(range(1,len(stocklist12)+1))
-
 weeks = list(range(1,54))
 
-f, (pl1, pl2) = plt.subplots(1, 2, figsize = (25,7))
-pl1.bar(weeks,muskcounts12)
-pl1.axis(xmin=1)
-pl1.set_xlabel('Week')
-pl1.set_ylabel('Tweet Count')
-f.subplots_adjust(wspace=0.2)
-pl2.plot(stocklist12len,stocklist12)
-pl2.set_xlabel('Week')
-pl2.set_ylabel('Stock Price')
-plt.show()
+def getDatabyYear(values,dates,year,weeks):
+    i = 0
+    data = [[] for _ in range(52)]
+    for item in values:
+        if dates[i][0:4]==year:
+            data[weeks[i]-1].append(item)
+        i+=1
+    averages = []
+    for l in data:
+        averages.append(np.mean(l))
+    return averages
+
+def plot_data(year):
+    muskcounts = []
+    muskcounts = dfTweets[year].tolist()
+    
+    stocklist = []
+    stocklist = getDatabyYear(stockclose,stockdates,year,StockWeekList)
+    stocklistlen = list(range(1,len(stocklist)+1))
+    
+    f, pl1 = plt.subplots(figsize = (50,28))
+    f.suptitle("Elon Musk Tweet Counts vs. Tesla Stock Prices "+year,fontsize=50)
+    pl2 = pl1.twinx()
+    pl1.bar(weeks,muskcounts,label="Elon Musk Tweets")
+    pl1.axis(xmin=1)
+    
+    pl2.plot(stocklistlen,stocklist,color="orange",linewidth=7.0,label="Tesla Stock Price at Close")
+    
+    pl2.grid(b=False)
+    
+    pl1.set_xlabel('Week',fontsize=40)
+    pl1.set_ylabel('Tweet Count',fontsize=40)
+    
+    pl2.set_ylabel('Stock Price',fontsize=40)
+    
+    pl1.tick_params(axis='both', which='major', labelsize=40)
+    pl2.tick_params(axis='both', which='major', labelsize=40)
+    
+    plt.legend(loc=0,fontsize=40)
+    
+    plt.savefig('TweetVsStock'+year+'.png')
+    plt.show()
+
+plot_data('2012')
+#plot_data('2013')
+#plot_data('2014')
+#plot_data('2015')
+#plot_data('2016')
+#plot_data('2017')
