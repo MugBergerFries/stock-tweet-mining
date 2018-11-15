@@ -15,9 +15,9 @@ def create_json(s):
 def filter_json(tweet,filter_terms): # filter json to only id and text
 	for x in filter_terms:
 		if('text' in tweet):
-			return (tweet['timestamp_ms'],tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
+			return (tweet['timestamp_ms'].encode("ascii"),tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
 		else:
-			return ('-1','','','','')
+			return (-1,'','','','')
 	#return (tweet['id'],tweet['text'])
 
 def deconstruct(j):
@@ -26,24 +26,18 @@ def deconstruct(j):
 
 def sentiment_scan(sentiments,s):
 	sSum = 0
-	for i in sentiments:
+	for i in sentiments['_c0']:
                 #print(i)
                 #print(s)
 		if(i[0] in s[4]): # fix this to count number of times i[0] appears
-			sSum += float(i[1])
+			sSum += float(sentiments['_c1'])
 	return [s,sSum] # works!
 
 
 
 def assign_sentiment(sc,filepath,sentiments):
-	sentiment = sc.textFile("file://" + sentiments)
-	mapped_sents = sentiment.map(lambda s: s.split(","))
-	#processed_sents = mapped_sents.reduce(lambda x,y: x + y)
-	sents = mapped_sents.collect()
-
 	file = sc.textFile("file://" + filepath)
 	filter_terms = ['a']
-
 	# first get a list of tuples of text/ids from data
 	# Applying map in the correct way may do the above ^
 	# apply sentiment scans to the new mapped objects
@@ -52,8 +46,7 @@ def assign_sentiment(sc,filepath,sentiments):
 	# file_filtered = file_json(lambda )
 	# deconstructed = file_json.map(lambda x: deconstruct(x))
 	file_sanitized = file_json.map(lambda x: filter_json(x,filter_terms))
-
-	file_map = file_sanitized.map(lambda s: sentiment_scan(sents,s)) # replace with better snetiment calculations here
+	file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
 	# file_reduce = file_map.reduce(lambda x,y: x + y)
 	return file_map # returns sentiments for tweets relating to a certain subject and they're sentiments
 
@@ -70,15 +63,17 @@ if __name__ == '__main__':
 #	conf = conf.setMaster("localhost") # set to cluster master nodes hostname or ip address
 #	sc = SparkContext(conf=conf)
         
-        spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
-        sc = spark.sparkContext
+    spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
+    sc = spark.sparkContext
 
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
-	stocks = "/opt/stock.json"
+	stocks = "/opt/stock.csv"
 
-	stock_data = parse_stock_data(sc,stocks)
-	raw_data = assign_sentiment(sc,filename,sentiments)
+	sentiment = spark.read.csv("file://" + sentiments)
+
+	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
+	raw_data = assign_sentiment(sc,filename,sentiment)
 
         tweets = raw_data.collect()
         print(tweets)
