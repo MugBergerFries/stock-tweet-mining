@@ -26,28 +26,32 @@ def deconstruct(j):
 
 def sentiment_scan(sentiments,s):
 	sSum = 0
-	for i in sentiments['_c0']:
-                #print(i)
-                #print(s)
+	for i in sentiments.select['_c0']:
+            #print(i)
+            #print(s)
 		if(i[0] in s[4]): # fix this to count number of times i[0] appears
 			sSum += float(sentiments['_c1'])
 	return [s,sSum] # works!
 
 
 
-def assign_sentiment(sc,filepath,sentiments):
-	file = sc.textFile("file://" + filepath)
+def assign_sentiment(sc,tweets,sentiments):
 	filter_terms = ['a']
 	# first get a list of tuples of text/ids from data
 	# Applying map in the correct way may do the above ^
 	# apply sentiment scans to the new mapped objects
 	# collect the objects by reducing to a single list
-	file_json = file.map(lambda x: create_json(x))
+	# file_json = file.map(lambda x: create_json(x))
 	# file_filtered = file_json(lambda )
 	# deconstructed = file_json.map(lambda x: deconstruct(x))
-	file_sanitized = file_json.map(lambda x: filter_json(x,filter_terms))
-	file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
+	# file_sanitized = file_json.map(lambda x: filter_json(x,filter_terms))
+	# file_map = file_sanitized.toDF()
+	#file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
 	# file_reduce = file_map.reduce(lambda x,y: x + y)
+	text = tweets.select('text')
+	text.udf(lambda x: sentiment_scan(x,sentiments))
+	
+
 	return file_map # returns sentiments for tweets relating to a certain subject and they're sentiments
 
 
@@ -62,10 +66,9 @@ if __name__ == '__main__':
 #	conf = SparkConf().setAppName(APP_NAME)
 #	conf = conf.setMaster("localhost") # set to cluster master nodes hostname or ip address
 #	sc = SparkContext(conf=conf)
-        
-    spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
-    sc = spark.sparkContext
-
+	
+	spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
+	sc = spark.sparkContext
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
 	stocks = "/opt/stock.csv"
@@ -73,10 +76,8 @@ if __name__ == '__main__':
 	sentiment = spark.read.csv("file://" + sentiments)
 
 	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
+	tweet_data = spark.read.json("file://" + filename)
 	raw_data = assign_sentiment(sc,filename,sentiment)
-
-        tweets = raw_data.collect()
-        print(tweets)
 
 	p = predict(raw_data,stock_data)
 	covariance = p.calculate_covariance()

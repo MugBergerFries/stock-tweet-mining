@@ -9,14 +9,11 @@ class predict:
         self.stocks = stock_data
 
 
-
     def calculate_covariance(self):
-        values = self.tweets.map(lambda x: x[1])
-        tweet_mean = values.mean()
-        stock_diff = self.stocks.map(lambda x: x['close'] - x['open'])
-        stock_mean = stock_diff.mean()
+        #self.tweets.stat.cov('')
         
-        print("TWEET MEAN ISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS {} AND STOCKS ARE {}".format(tweet_mean,stock_mean))
+        #print("TWEET MEAN ISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS {} AND STOCKS ARE {}".format(tweet_mean,stock_mean))
+        pass
     
     def find_outliers(self):
         pass
