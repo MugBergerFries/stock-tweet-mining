@@ -1,4 +1,4 @@
-from pyspark import SparkConf, SparkContext
+from pyspark.sql import SparkSession
 import json
 from prediction import *
 
@@ -14,7 +14,7 @@ def create_json(s):
 
 def filter_json(tweet,filter_terms): # filter json to only id and text
 	for x in filter_terms:
-		if(x in tweet and 'text' in tweet):
+		if('text' in tweet):
 			return (tweet['timestamp_ms'],tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
 		else:
 			return ('-1','','','','')
@@ -27,9 +27,11 @@ def deconstruct(j):
 def sentiment_scan(sentiments,s):
 	sSum = 0
 	for i in sentiments:
-		if(i[0] in s[1]): # fix this to count number of times i[0] appears
+                #print(i)
+                #print(s)
+		if(i[0] in s[4]): # fix this to count number of times i[0] appears
 			sSum += float(i[1])
-	return [i[0],sSum] # works!
+	return [s,sSum] # works!
 
 
 
@@ -40,7 +42,7 @@ def assign_sentiment(sc,filepath,sentiments):
 	sents = mapped_sents.collect()
 
 	file = sc.textFile("file://" + filepath)
-	filter_terms = ['apple','Apple','tim cook','Tim Cook','tim_cook','Tim_Cook']
+	filter_terms = ['a']
 
 	# first get a list of tuples of text/ids from data
 	# Applying map in the correct way may do the above ^
@@ -57,16 +59,19 @@ def assign_sentiment(sc,filepath,sentiments):
 
 
 def parse_stock_data(sc,stock_path):
-	stock_file = sc.file("file://" + stock_path)
+	stock_file = sc.textFile("file://" + stock_path)
 	stock_parsed = stock_file.map(lambda x: x.split(","))
 	return stock_parsed
 
 
 
 if __name__ == '__main__':
-	conf = SparkConf().setAppName(APP_NAME)
-	conf = conf.setMaster("192.168.56.101") # set to cluster master nodes hostname or ip address
-	sc = SparkContext(conf=conf)
+#	conf = SparkConf().setAppName(APP_NAME)
+#	conf = conf.setMaster("localhost") # set to cluster master nodes hostname or ip address
+#	sc = SparkContext(conf=conf)
+        
+        spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
+        sc = spark.sparkContext
 
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
@@ -75,7 +80,10 @@ if __name__ == '__main__':
 	stock_data = parse_stock_data(sc,stocks)
 	raw_data = assign_sentiment(sc,filename,sentiments)
 
-	p = predict(data,stock_data)
+        tweets = raw_data.collect()
+        print(tweets)
+
+	p = predict(raw_data,stock_data)
 	covariance = p.calculate_covariance()
 	outliers = p.find_outliers()
 	

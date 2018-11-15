@@ -4,17 +4,17 @@ import numpy as np
 import pandas as pd
 
 class predict:
-    def __init__(tweet_data,stock_data):
+    def __init__(self,tweet_data,stock_data):
         self.tweets = tweet_data
         self.stocks = stock_data
 
     def covariance_eq(dataPt):
         pass
-        np.co
 
     def calculate_covariance(self):
-        self.data.map(lambda x: )
-        pass
+        values = self.tweets.map(lambda x: x[1])
+        tweet_mean = values.mean()
+        print("TWEET MEAN ISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS " +str(tweet_mean))
     
     def find_outliers(self):
         pass
