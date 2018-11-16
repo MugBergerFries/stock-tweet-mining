@@ -15,7 +15,7 @@ def create_json(s):
 def filter_json(tweet,filter_terms): # filter json to only id and text
 	for x in filter_terms:
 		if('text' in tweet):
-			return (tweet['timestamp_ms'].encode("ascii"),tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
+			return (tweet['timestamp_ms'],tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
 		else:
 			return (-1,'','','','')
 	#return (tweet['id'],tweet['text'])
@@ -25,18 +25,13 @@ def deconstruct(j):
 
 
 def sentiment_scan(sentiments,s):
-	sSum = 0
-	for i in sentiments.select['_c0']:
-            #print(i)
-            #print(s)
-		if(i[0] in s[4]): # fix this to count number of times i[0] appears
-			sSum += float(sentiments['_c1'])
-	return [s,sSum] # works!
+	words = s.split(' ') 
+
 
 
 
 def assign_sentiment(sc,tweets,sentiments):
-	filter_terms = ['a']
+	#filter_terms = ['a']
 	# first get a list of tuples of text/ids from data
 	# Applying map in the correct way may do the above ^
 	# apply sentiment scans to the new mapped objects
@@ -46,13 +41,13 @@ def assign_sentiment(sc,tweets,sentiments):
 	# deconstructed = file_json.map(lambda x: deconstruct(x))
 	# file_sanitized = file_json.map(lambda x: filter_json(x,filter_terms))
 	# file_map = file_sanitized.toDF()
-	#file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
+	# file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
 	# file_reduce = file_map.reduce(lambda x,y: x + y)
-	text = tweets.select('text')
+	text = tweets.withColumn('text',tweets.lower)
 	text.udf(lambda x: sentiment_scan(x,sentiments))
 	
 
-	return file_map # returns sentiments for tweets relating to a certain subject and they're sentiments
+	return text # returns sentiments for tweets relating to a certain subject and they're sentiments
 
 
 def parse_stock_data(sc,stock_path):
