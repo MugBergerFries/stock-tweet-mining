@@ -49,12 +49,10 @@ def assign_sentiment(sc,tweets,sentiments):
 
 	return text # returns sentiments for tweets relating to a certain subject and they're sentiments
 
-
-def parse_stock_data(sc,stock_path):
-	stock_file = sc.textFile("file://" + stock_path)
-	stock_parsed = stock_file.map(lambda x: x.split(","))
-	return stock_parsed
-
+def get_stock_labels(stock_data):
+	stocks = stock_data.selectExpr("_c0 as date","_c1 as close","_c2 as volume","_c3 as open","_c4 as high","_c5 as low")
+	diff = stocks.withColumn('diff',stocks.close - stocks.open)
+	return diff.filter(diff.date.rlike('2015/12/*'))
 
 
 if __name__ == '__main__':
@@ -74,9 +72,9 @@ if __name__ == '__main__':
 	tweet_data = spark.read.json("file://" + filename)
 	raw_data = assign_sentiment(sc,filename,sentiment)
 
-	p = predict(raw_data,stock_data)
-	covariance = p.calculate_covariance()
-	outliers = p.find_outliers()
+	labels = get_stock_labels(stock_data)
+
+	p = predict(raw_data,labels)
 	
 
 

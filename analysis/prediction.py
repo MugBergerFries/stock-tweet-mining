@@ -21,6 +21,8 @@ class predict:
         pass
 
     def neural_net(self):
+        # format data to match training data
+
         model = keras.Sequential([
             keras.layers.Dense(30,activation='relu'),
             keras.layers.Dense(20,activation='relu'),
@@ -29,8 +31,15 @@ class predict:
         ])
 
         model.compile(optimizer=tf.train.AdamOptimizer(0.01),
-              loss='mse',       # mean squared error
-              metrics=['mae'])  # mean absolute error
+              loss='sparse_categorical_crossentropy', # classify for 0 or 1
+              metrics=['accuracy'])  # get accuracy
+
+        model.fit(self.tweets,self.stocks)
+
+        # model.fit(x: samples, y: labels) # labels are the stock differences (up or down) and the samples is the tweet data
+        
+        # Create training data -> inputs = bins of tweet sentiments (maybe also timestamps)
+        #                       -> outputs = up or down, go through current stock data, get ups and downs
         
         # input data as vector, use binning
         # pass 
