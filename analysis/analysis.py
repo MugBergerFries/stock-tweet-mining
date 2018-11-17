@@ -5,30 +5,10 @@ import pandas as pd
 import numpy as np
 
 
-APP_NAME = "sentiment calculations"
-
-def create_json(s):
-	# newItemm['statuses'][0]['text']
-	newJson = json.loads(s)
-	return newJson
-
-
-
-def filter_json(tweet,filter_terms): # filter json to only id and text
-	for x in filter_terms:
-		if('text' in tweet):
-			return (tweet['timestamp_ms'],tweet['created_at'],tweet['geo'],tweet['id'],tweet['text'])
-		else:
-			return (-1,'','','','')
-	#return (tweet['id'],tweet['text'])
-
-def deconstruct(j):
-	return j['statuses']
+APP_NAME = "Social Media as an Economic Indicator"
 
 
 def sentiment_scan(sentiments,s): # define this as a udf, than put it inside a withColumn statement
-	# words = s.split(' ')
-	# s.foreach(lambda x: s.text.split(' '))
 	acc = float(0) 
 	for word in sentiments['word']:
 		#print(acc)
@@ -36,8 +16,6 @@ def sentiment_scan(sentiments,s): # define this as a udf, than put it inside a w
 			value = sentiments.loc[sentiments['word'] == word,'value']
 			acc += float(value)
 	return [acc]
-
-
 
 
 def assign_sentiment(sc,tweets,sentiments):
@@ -76,12 +54,12 @@ if __name__ == '__main__':
 
 	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
 	tweet_data = spark.read.json("file://" + filename)
-	raw_data = assign_sentiment(sc,filename,sentiment)
+	raw_data = assign_sentiment(sc,tweet_data,sentiment)
 
 	labels = get_stock_labels(stock_data)
 	tweet_bins = bin_tweets(raw_data)
 
-	p = predict(raw_data,labels)
+	p = predict(tweet_bins,labels)
 	p.neural_net()
 	
 

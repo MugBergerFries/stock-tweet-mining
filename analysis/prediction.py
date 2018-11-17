@@ -27,11 +27,13 @@ class predict:
             keras.layers.Dense(1)
         ])
 
-        model.compile(optimizer=tf.train.AdamOptimizer(0.01),
-              loss='sparse_categorical_crossentropy', # classify for 0 or 1
-              metrics=['accuracy'])  # get accuracy
+        optimizer = tf.train.RMSPropOptimizer(0.001)
 
-        model.fit(self.tweets,self.stocks)
+        model.compile(optimizer=optimizer,
+              loss='mse', # classify for 0 or 1
+              metrics=['mae'])  # get accuracy
+
+        model.fit(self.tweets.toPandas().values,self.stocks.toPandas()['diff'].values[0:6],epochs=1000)
 
         # model.fit(x: samples, y: labels) # labels are the stock differences (up or down) and the samples is the tweet data
         
