@@ -1,6 +1,3 @@
-from pyspark import SparkConf, SparkContext
-import json
-import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 

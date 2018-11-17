@@ -1,6 +1,8 @@
 from pyspark.sql import SparkSession
 import json
 from prediction import *
+import pandas as pd
+import numpy as np
 
 
 APP_NAME = "sentiment calculations"
@@ -24,35 +26,39 @@ def deconstruct(j):
 	return j['statuses']
 
 
-def sentiment_scan(sentiments,s):
-	words = s.split(' ') 
+def sentiment_scan(sentiments,s): # define this as a udf, than put it inside a withColumn statement
+	# words = s.split(' ')
+	# s.foreach(lambda x: s.text.split(' '))
+	acc = float(0) 
+	for word in sentiments['word']:
+		#print(acc)
+		if(str(word).encode('utf-8') in s.encode('utf-8')):
+			value = sentiments.loc[sentiments['word'] == word,'value']
+			acc += float(value)
+	return [acc]
 
 
 
 
 def assign_sentiment(sc,tweets,sentiments):
-	#filter_terms = ['a']
-	# first get a list of tuples of text/ids from data
-	# Applying map in the correct way may do the above ^
-	# apply sentiment scans to the new mapped objects
-	# collect the objects by reducing to a single list
-	# file_json = file.map(lambda x: create_json(x))
-	# file_filtered = file_json(lambda )
-	# deconstructed = file_json.map(lambda x: deconstruct(x))
-	# file_sanitized = file_json.map(lambda x: filter_json(x,filter_terms))
-	# file_map = file_sanitized.toDF()
-	# file_map = file_sanitized.map(lambda s: sentiment_scan(sentiments,s)) # replace with better snetiment calculations here
-	# file_reduce = file_map.reduce(lambda x,y: x + y)
-	text = tweets.withColumn('text',tweets.lower)
-	text.udf(lambda x: sentiment_scan(x,sentiments))
+	tweets = tweets.filter(tweets.text.contains('apple') | tweets.text.contains('Apple') | tweets.text.contains('tim cook') | tweets.text.contains('Tim Cook'))
+	dfSent = tweets.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments")
+	return tweets.join(dfSent)
 	
-
-	return text # returns sentiments for tweets relating to a certain subject and they're sentiments
 
 def get_stock_labels(stock_data):
 	stocks = stock_data.selectExpr("_c0 as date","_c1 as close","_c2 as volume","_c3 as open","_c4 as high","_c5 as low")
 	diff = stocks.withColumn('diff',stocks.close - stocks.open)
 	return diff.filter(diff.date.rlike('2015/12/*'))
+
+def bin_tweets(tweets):
+	bins = [0,0,0,0,0,0,0,0,0,0]
+	count = -1
+	for i in range(10):
+		bin = tweets.filter(tweets.sentiments > count).filter(tweets.sentiments < count + 0.2)
+		bins[i] = bin.count()
+		count += 0.2
+	return bins
 
 
 if __name__ == '__main__':
@@ -66,15 +72,17 @@ if __name__ == '__main__':
 	sentiments = "/opt/sentiments.csv"
 	stocks = "/opt/stock.csv"
 
-	sentiment = spark.read.csv("file://" + sentiments)
+	sentiment = pd.read_csv(sentiments) # spark.read.csv("file://" + sentiments)
 
 	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
 	tweet_data = spark.read.json("file://" + filename)
 	raw_data = assign_sentiment(sc,filename,sentiment)
 
 	labels = get_stock_labels(stock_data)
+	tweet_bins = bin_tweets(raw_data)
 
 	p = predict(raw_data,labels)
+	p.neural_net()
 	
 
 
