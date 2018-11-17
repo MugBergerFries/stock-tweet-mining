@@ -44,7 +44,7 @@ if __name__ == '__main__':
 #	conf = conf.setMaster("localhost") # set to cluster master nodes hostname or ip address
 #	sc = SparkContext(conf=conf)
 	
-	spark = SparkSession.builder.appName("APP_NAME").getOrCreate()
+	spark = SparkSession.builder.appName(APP_NAME).getOrCreate()
 	sc = spark.sparkContext
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
@@ -59,8 +59,18 @@ if __name__ == '__main__':
 	labels = get_stock_labels(stock_data)
 	tweet_bins = bin_tweets(raw_data)
 
-	p = predict(tweet_bins,labels)
+	p = predict()
 	p.neural_net()
+	for i in range(31): # loop through every day and update neural network based on new data
+		# filter tweet data based on day here
+		# filter stock data based on day here
+		p.train_network(tweet_bins,labels) # apply new filtered data for stocks and tweets here
+	# run tests on data that has been set aside for testing here
+
+	
+
+	
+	
 	
 
 
