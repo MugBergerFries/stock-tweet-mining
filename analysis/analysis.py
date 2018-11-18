@@ -30,7 +30,7 @@ def get_stock_labels(stock_data):
 	return diff.filter(diff.date.rlike('2015/12/*'))
 
 def bin_tweets(tweets):
-	bins = [0,0,0,0,0,0,0,0,0,0]
+	bins = np.array([0,0,0,0,0,0,0,0,0,0])
 	count = -1
 	for i in range(10):
 		bin = tweets.filter(tweets.sentiments > count).filter(tweets.sentiments < count + 0.2)
@@ -56,15 +56,16 @@ if __name__ == '__main__':
 	tweet_data = spark.read.json("file://" + filename)
 	raw_data = assign_sentiment(sc,tweet_data,sentiment)
 
-	labels = get_stock_labels(stock_data)
-	tweet_bins = bin_tweets(raw_data)
+	
 
 	p = predict()
 	p.neural_net()
 	for i in range(31): # loop through every day and update neural network based on new data
 		# filter tweet data based on day here
 		# filter stock data based on day here
-		p.train_network(tweet_bins,labels) # apply new filtered data for stocks and tweets here
+		labels = get_stock_labels(stock_data)
+		tweet_bins = bin_tweets(raw_data)
+		p.train_network(raw_data,labels) # apply new filtered data for stocks and tweets here
 	# run tests on data that has been set aside for testing here
 
 	
