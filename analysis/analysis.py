@@ -56,16 +56,26 @@ if __name__ == '__main__':
 	tweet_data = spark.read.json("file://" + filename)
 	raw_data = assign_sentiment(sc,tweet_data,sentiment)
 
-	
+	labels = get_stock_labels(stock_data)
+	tweet_bins = bin_tweets(raw_data)
+
+	train_tweets = np.array([raw_data.toPandas().values.flatten()])
+	train_stocks = labels.toPandas()['diff'].values
+	for i in range(len(train_stocks)):
+		val = float(train_stocks[i])
+		if(val < 0.2 and val > -0.2):
+			train_stocks[i] = 0
+		elif(val > 0):
+			train_stocks[i] = 1
+		else:
+			train_stocks[i] = -1
 
 	p = predict()
 	p.neural_net()
 	for i in range(31): # loop through every day and update neural network based on new data
 		# filter tweet data based on day here
 		# filter stock data based on day here
-		labels = get_stock_labels(stock_data)
-		tweet_bins = bin_tweets(raw_data)
-		p.train_network(raw_data,labels) # apply new filtered data for stocks and tweets here
+		p.train_network(train_tweets,np.array([[train_stocks[0],train_stocks[1],train_stocks[2]]]) # apply new filtered data for stocks and tweets here
 	# run tests on data that has been set aside for testing here
 
 	

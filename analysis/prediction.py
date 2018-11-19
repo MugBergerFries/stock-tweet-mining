@@ -4,14 +4,12 @@ import numpy as np
 
 
 class predict:
-    def __init__(self):
+    def __init__(self): # min, 25%, 50%, 75%, and max for sentiments on morn, noon, evening, general, and morn, noon, evening for exec
         self.model = keras.Sequential([
-            keras.layers.Dense(9,activation='relu'),
-            keras.layers.Dense(27,activation='relu'),
-            keras.layers.Dense(72,activation='relu'),
-            keras.layers.Dense(27,activation='relu'),
-            keras.layers.Dense(9,activation='relu'),
-            keras.layers.Dense(1)
+            keras.layers.Dense(30,activation='relu'), 
+            keras.layers.Dense(20,activation='relu'),
+            keras.layers.Dense(10,activation='relu'),
+            keras.layers.Dense(3)
         ])
 
 
@@ -59,16 +57,6 @@ class predict:
 
     def train_network(self,train_tweets,train_stock):
         # tweets = np.array(train_tweets)
-        train_tweets = np.array([train_tweets.toPandas().values.flatten()])
-        train_stocks = train_stock.toPandas()['diff'].values
-        for i in range(len(train_stocks)):
-            val = float(train_stocks[i])
-            if(val < 0.5 and val > -0.5):
-                val = 0
-            elif(val > 0):
-                val = 1
-            else:
-                val = -1
-            train_stocks[i] = val
+        # create array based on first 3 days, split the data into 1d array for every 3 days. Can also overlap days
 
-        self.model.fit(train_tweets,train_stocks,epochs=500)
+        self.model.fit(train_tweets,train_stock,epochs=5)
