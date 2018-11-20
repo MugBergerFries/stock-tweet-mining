@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import avg
-import json
+# from pyspark.sql.functions import avg
+# import json
 from prediction import *
 import pandas as pd
 import numpy as np
