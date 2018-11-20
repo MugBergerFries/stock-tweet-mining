@@ -26,9 +26,9 @@ def split_by_day(data,filter_days):
 	# sentiment calculated in this functi
 	in_form = "%b %d %X %z %Y" # limit_unixtime = time.mktime(filter_days[0].timetuple())
 
-	day1 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[0]) # datetime.strptime(data.created_at,in_form).strftime('%Y-%m-%d') == filter_days[0]) # Tue Dec 29 08:00:00 +0000 2015
-	day2 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[1]) # may not work!!!!!
-	day3 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[2])
+	day1 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[0]) # datetime.strptime(data.created_at,in_form).strftime('%Y-%m-%d') == filter_days[0]) # Tue Dec 29 08:00:00 +0000 2015
+	day2 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[1]) # may not work!!!!!
+	day3 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[2])
 
 	if(day1.isEmpty()):
 		out1 = 0
@@ -60,7 +60,7 @@ def assign_sentiment(sc,tweets,sentiments,days):
 	for i in range(len(days)-2):
 		execSplit = split_by_day(execs,days[i:i+3])
 		tweetSplit = split_by_day(generalPublic,days[i:i+3])
-		# tweetSplit2 = split_by_day(generalPublic,days[i:i+3])
+		# tweetSplit2 = split_by_day(generalPublic,days[i:im+3])
 		training_data.append([execSplit + tweetSplit + tweetSplit])	
 	# dfGeneral = tweets.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments")
 	return training_data
