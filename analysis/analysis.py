@@ -5,6 +5,7 @@ from prediction import *
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from dateutil import parser
 
 
 APP_NAME = "Social Media as an Economic Indicator"
@@ -22,30 +23,45 @@ def sentiment_scan(sentiments,s): # define this as a udf, than put it inside a w
 def split_by_day(data,filter_days):
 	# time = datetime.strptime(data['created_at'])
 	# returns an array, where one side is sentiment for day1, next for day2, third for day3
-	# sentiment calculated in this function
+	# sentiment calculated in this functi
+	in_form = "%b %d %X %z %Y" # limit_unixtime = time.mktime(filter_days[0].timetuple())
 
-	day1 = data.filter(datetime.strptime(data.created_at).strftime('%Y-%m-%d') == filter_days[0])
-	day2 = data.filter(datetime.strptime(data.created_at).strftime('%Y-%m-%d') == filter_days[1]) # may not work!!!!!
-	day3 = data.filter(datetime.strptime(data.created_at).strftime('%Y-%m-%d') == filter_days[2])
+	day1 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[0]) # datetime.strptime(data.created_at,in_form).strftime('%Y-%m-%d') == filter_days[0]) # Tue Dec 29 08:00:00 +0000 2015
+	day2 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[1]) # may not work!!!!!
+	day3 = data.rdd.filter(lambda t: parser.parse(t['created_at']) == filter_days[2])
 
-	df1 = day1.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
-	df2 = day2.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
-	df3 = day3.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
+	if(day1.isEmpty()):
+		out1 = 0
+	else:
+		df1 = day1.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
+		out1 = df1['sentiments'].mean()
+	
+	if(day2.isEmpty()):
+		out2 = 0
+	else:
+		df2 = day2.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
+		out2 = df2['sentiments'].mean()
+
+	if(day3.isEmpty()):
+		out3 = 0
+	else:
+		df3 = day3.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments").toPandas()
+		out3 = df3['sentiments'].mean()
 
 	
-	return [df1['sentiments'].mean(),df2['sentiments'].mean().df3['sentiments'].mean()]
+	return [out1,out2,out3]
 
 
 def assign_sentiment(sc,tweets,sentiments,days):
 	tweets = tweets.filter(tweets.user['screen_name'].contains('tim_cook') | tweets.text.contains('apple') | tweets.text.contains('Apple') | tweets.text.contains('tim cook') | tweets.text.contains('Tim Cook'))
 	execs = tweets.filter(tweets.user['screen_name'].contains('tim_cook'))
-	generalPublic = tweets.filter(not tweets.user['screen_name'].contains('tim_cook'))
+	generalPublic = tweets.filter(~tweets.user['screen_name'].contains('tim_cook'))
 	training_data = []
 	for i in range(len(days)-2):
 		execSplit = split_by_day(execs,days[i:i+3])
 		tweetSplit = split_by_day(generalPublic,days[i:i+3])
-		tweetSplit2 = split_by_day(generalPublic,days[i:i+3])
-		training_data.append([execSplit + tweetSplit + tweetSplit2])	
+		# tweetSplit2 = split_by_day(generalPublic,days[i:i+3])
+		training_data.append([execSplit + tweetSplit + tweetSplit])	
 	# dfGeneral = tweets.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments")
 	return training_data
 	
