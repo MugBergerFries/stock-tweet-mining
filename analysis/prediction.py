@@ -15,8 +15,6 @@ class predict:
 
     def calculate_covariance(self):
         #self.tweets.stat.cov('')
-        
-        #print("TWEET MEAN ISSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS {} AND STOCKS ARE {}".format(tweet_mean,stock_mean))
         pass
     
     def find_outliers(self):
@@ -58,5 +56,4 @@ class predict:
     def train_network(self,train_tweets,train_stock):
         # tweets = np.array(train_tweets)
         # create array based on first 3 days, split the data into 1d array for every 3 days. Can also overlap days
-
         self.model.fit(train_tweets,train_stock,epochs=1000)
