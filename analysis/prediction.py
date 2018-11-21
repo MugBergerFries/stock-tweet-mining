@@ -6,10 +6,10 @@ import numpy as np
 class predict:
     def __init__(self): # min, 25%, 50%, 75%, and max for sentiments on morn, noon, evening, general, and morn, noon, evening for exec
         self.model = keras.Sequential([
-            keras.layers.Dense(30,activation='relu'), 
-            keras.layers.Dense(20,activation='relu'),
-            keras.layers.Dense(10,activation='relu'),
-            keras.layers.Dense(3)
+            keras.layers.Dense(9,activation='relu'), 
+            keras.layers.Dense(5,activation='relu'),
+            keras.layers.Dense(3) #,activation='relu'),
+            # keras.layers.Dense(3)
         ])
 
 
@@ -36,7 +36,7 @@ class predict:
         ])
         '''
 
-        optimizer = tf.train.RMSPropOptimizer(0.001)
+        optimizer = tf.train.RMSPropOptimizer(0.01)
 
         self.model.compile(optimizer=optimizer,
               loss='mse', # classify for 0 or 1
