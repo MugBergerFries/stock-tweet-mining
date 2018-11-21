@@ -1,11 +1,16 @@
 import tensorflow as tf
 from tensorflow import keras
+import numpy as np
 
 
 class predict:
-    def __init__(self,tweet_data,stock_data):
-        self.tweets = tweet_data
-        self.stocks = stock_data
+    def __init__(self): # min, 25%, 50%, 75%, and max for sentiments on morn, noon, evening, general, and morn, noon, evening for exec
+        self.model = keras.Sequential([
+            keras.layers.Dense(30,activation='relu'), 
+            keras.layers.Dense(20,activation='relu'),
+            keras.layers.Dense(10,activation='relu'),
+            keras.layers.Dense(3)
+        ])
 
 
     def calculate_covariance(self):
@@ -20,20 +25,24 @@ class predict:
     def neural_net(self):
         # format data to match training data
 
-        model = keras.Sequential([
-            keras.layers.Dense(30,activation='relu'),
-            keras.layers.Dense(20,activation='relu'),
-            keras.layers.Dense(10,activation='relu'),
+        '''
+        self.model = keras.Sequential([
+            keras.layers.Dense(9,activation='relu'),
+            keras.layers.Dense(27,activation='relu'),
+            keras.layers.Dense(72,activation='relu'),
+            keras.layers.Dense(27,activation='relu'),
+            keras.layers.Dense(9,activation='relu'),
             keras.layers.Dense(1)
         ])
+        '''
 
         optimizer = tf.train.RMSPropOptimizer(0.001)
 
-        model.compile(optimizer=optimizer,
+        self.model.compile(optimizer=optimizer,
               loss='mse', # classify for 0 or 1
               metrics=['mae'])  # get accuracy
 
-        model.fit(self.tweets.toPandas().values,self.stocks.toPandas()['diff'].values[0:6],epochs=1000)
+        
 
         # model.fit(x: samples, y: labels) # labels are the stock differences (up or down) and the samples is the tweet data
         
@@ -45,3 +54,9 @@ class predict:
         # per unit time inputs?
         # batch learning, process a classifier per day. Classify only for data per day
         # inputs = tweets on particular day, outputs = predicted stock price on that day, or whether price will go up or down
+
+    def train_network(self,train_tweets,train_stock):
+        # tweets = np.array(train_tweets)
+        # create array based on first 3 days, split the data into 1d array for every 3 days. Can also overlap days
+
+        self.model.fit(train_tweets,train_stock,epochs=1000)
