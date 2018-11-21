@@ -20,11 +20,11 @@ def sentiment_scan(sentiments,s): # define this as a udf, than put it inside a w
 			acc += float(value)
 	return [acc]
 
-def split_by_day(data,filter_days):
+def split_by_day(data,sentiments,filter_days):
 	# time = datetime.strptime(data['created_at'])
 	# returns an array, where one side is sentiment for day1, next for day2, third for day3
 	# sentiment calculated in this functi
-	in_form = "%b %d %X %z %Y" # limit_unixtime = time.mktime(filter_days[0].timetuple())
+	# in_form = "%b %d %X %z %Y" # limit_unixtime = time.mktime(filter_days[0].timetuple())
 
 	day1 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[0]) # datetime.strptime(data.created_at,in_form).strftime('%Y-%m-%d') == filter_days[0]) # Tue Dec 29 08:00:00 +0000 2015
 	day2 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[1]) # may not work!!!!!
@@ -58,10 +58,13 @@ def assign_sentiment(sc,tweets,sentiments,days):
 	generalPublic = tweets.filter(~tweets.user['screen_name'].contains('tim_cook'))
 	training_data = []
 	for i in range(len(days)-2):
-		execSplit = split_by_day(execs,days[i:i+3])
-		tweetSplit = split_by_day(generalPublic,days[i:i+3])
+		execSplit = split_by_day(execs,sentiments,days[i:i+3])
+		tweetSplit = split_by_day(generalPublic,sentiments,days[i:i+3])
 		# tweetSplit2 = split_by_day(generalPublic,days[i:im+3])
-		training_data.append([execSplit + tweetSplit + tweetSplit])	
+		# for i in range(len(tweetSplit)/2):
+		sample1 = np.random.choice(tweetSplit,size=len(tweetSplit),replace=False).tolist()
+		sample2 = np.random.choice(tweetSplit,size=len(tweetSplit),replace=False).tolist()
+		training_data.append([execSplit + sample1 + sample2])
 	# dfGeneral = tweets.rdd.map(lambda x: sentiment_scan(sentiments,x.text)).toDF().selectExpr("_1 as sentiments")
 	return training_data
 	
@@ -93,14 +96,16 @@ if __name__ == '__main__':
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
 	stocks = "/opt/stock.csv"
-	days = ['2015-12-1','2015-12-2','2015-12-3','2015-12-4','2015-12-7','2015-12-8','2015-12-9','2015-12-10','2015-12-11','2015-12-14','2015-12-15',
+	days2015 = ['2015-12-1','2015-12-2','2015-12-3','2015-12-4','2015-12-7','2015-12-8','2015-12-9','2015-12-10','2015-12-11','2015-12-14','2015-12-15',
 	'2015-12-16','2015-12-17','2015-12-18','2015-12-21','2015-12-22','2015-12-23','2015-12-24','2015-12-28','2015-12-29','2015-12-30','2015-12-31']
+
+	days2018 = ['2018-04-1']
 
 	sentiment = pd.read_csv(sentiments) # spark.read.csv("file://" + sentiments)
 
 	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
 	tweet_data = spark.read.json("file://" + filename)
-	train_tweets = assign_sentiment(sc,tweet_data,sentiment,days)
+	train_tweets = assign_sentiment(sc,tweet_data,sentiment,days2015)
 
 	labels = get_stock_labels(stock_data)
 	#tweet_bins = bin_tweets(raw_data)
@@ -122,8 +127,8 @@ if __name__ == '__main__':
 
 	p = predict()
 	p.neural_net()
-	for i in range(31): # loop through every day and update neural network based on new data
+	#for i in range(31): # loop through every day and update neural network based on new data
 		# filter tweet data based on day here
 		# filter stock data based on day here
-		p.train_network(np.array(train_tweets),np.array(train_stocks)) # apply new filtered data for stocks and tweets here
+	p.train_network(np.array(train_tweets),np.array(train_stocks)) # apply new filtered data for stocks and tweets here
 	# run tests on data that has been set aside for testing here
