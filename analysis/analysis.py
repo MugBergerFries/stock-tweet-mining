@@ -154,6 +154,11 @@ if __name__ == '__main__':
 	print("Training outputs (stock data) are {}".format(train_stocks))
 	print("Training inputs (tweet data) are {}".format(train_tweets))
 
+	with open("neural_network/training_stock_data.dat",'w') as f: # 
+		f.write(train_stocks)
+	with open("neural_network/training_tweet_data.dat",'w') as f:
+		f.write(train_tweets)
+
 	p = predict() # create prediction object
 	p.neural_net() # build neural net
 	#for i in range(31): # loop through every day and update neural network based on new data

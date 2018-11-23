@@ -58,7 +58,7 @@ class predict:
         with open("model.json", "w") as json_file:
             json_file.write(model_json)
         # serialize weights to HDF5
-        self.model.save_weights("model.h5")
+        self.model.save_weights("neural_network/model.h5")
         print("Saved model to disk")
 
     def load_network(self): # loads a network from saved files
@@ -67,5 +67,5 @@ class predict:
         json_file.close()
         self.model = keras.models.model_from_json(loaded_model_json)
         # load weights into new model
-        self.model.load_weights("model.h5")
+        self.model.load_weights("neural_network/model.h5")
         print("Loaded model from disk")
