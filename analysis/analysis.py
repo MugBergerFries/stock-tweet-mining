@@ -117,7 +117,7 @@ def filter_stocks(stocks,days):
 	#print(raw_stocks)
 	train_stocks = []
 	for i in range(3,len(days)-2): # get all stock values that occur in the 3 days after tweet values
-		stock_split = split_stocks(stocks,days)
+		stock_split = split_stocks(stocks,days[i:i+3])
 		train_stocks.append(stock_split)
 		#print(train_stocks)
 	return train_stocks
@@ -135,7 +135,7 @@ if __name__ == '__main__':
 	filename = "/opt/output.json"
 	sentiments = "/opt/sentiments.csv"
 	stocks = "/opt/stock.csv"
-	days2015 = ['2015-12-29','2015-12-02','2015-12-03','2015-12-04','2015-12-07','2015-12-08','2015-12-09','2015-12-10','2015-12-11','2015-12-14','2015-12-15',
+	days2015 = ['2015-12-02','2015-12-03','2015-12-04','2015-12-07','2015-12-08','2015-12-09','2015-12-10','2015-12-11','2015-12-14','2015-12-15',
 	'2015-12-16','2015-12-17','2015-12-18','2015-12-21','2015-12-22','2015-12-23','2015-12-24','2015-12-28','2015-12-29','2015-12-30','2015-12-31']
 
 	days2018 = ['2018-04-01']
@@ -154,8 +154,7 @@ if __name__ == '__main__':
 
 	with open("neural_network/training_stock_data.dat",'w') as f: # 
 		for i in train_stocks:
-			for j in i:
-				f.write(str(j) + ",")
+			f.write(str(i) + ",")
 			f.write('\n')
 	with open("neural_network/training_tweet_data.dat",'w') as f:
 		for i in train_tweets:
