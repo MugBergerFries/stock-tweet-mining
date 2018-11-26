@@ -31,8 +31,6 @@ def split_by_day(data,sentiments,filter_days):
 #	test = data.rdd.map(lambda t: test_func(t))
 #	out = test.collect()
 #	print("OUT IS: {}".format(out))
-	
-
 	day1 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[0]) # datetime.strptime(data.created_at,in_form).strftime('%Y-%m-%d') == filter_days[0]) # Tue Dec 29 08:00:00 +0000 2015
 	day2 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[1]) 
 	day3 = data.rdd.filter(lambda t: parser.parse(t['created_at']).strftime('%Y-%m-%d') == filter_days[2])
@@ -155,9 +153,15 @@ if __name__ == '__main__':
 	print("Training inputs (tweet data) are {}".format(train_tweets))
 
 	with open("neural_network/training_stock_data.dat",'w') as f: # 
-		f.write(train_stocks)
+		for i in train_stocks:
+			for j in i:
+				f.write(str(j) + ",")
+			f.write('\n')
 	with open("neural_network/training_tweet_data.dat",'w') as f:
-		f.write(train_tweets)
+		for i in train_tweets:
+			for j in i:
+				f.write(str(j) + ",")
+			f.write('\n')
 
 	p = predict() # create prediction object
 	p.neural_net() # build neural net
