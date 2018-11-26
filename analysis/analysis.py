@@ -153,14 +153,9 @@ if __name__ == '__main__':
 	print("Training inputs (tweet data) are {}".format(train_tweets))
 
 	with open("neural_network/training_stock_data.dat",'w') as f: # 
-		for i in train_stocks:
-			f.write(str(i) + ",")
-			f.write('\n')
+		f.write(str(train_stocks))
 	with open("neural_network/training_tweet_data.dat",'w') as f:
-		for i in train_tweets:
-			for j in i:
-				f.write(str(j) + ",")
-			f.write('\n')
+		f.write(str(train_tweets))
 
 	p = predict() # create prediction object
 	p.neural_net() # build neural net
