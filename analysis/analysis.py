@@ -132,9 +132,9 @@ if __name__ == '__main__':
 	sc = spark.sparkContext
 	sc.setLogLevel("WARN") # less verbose
 
-	filename = "/opt/output.json"
+	filename = "/user/mawi0949/output.json"
 	sentiments = "/opt/sentiments.csv"
-	stocks = "/opt/stock.csv"
+	stocks = "/user/mawi0949/stock.csv"
 	days2015 = ['2015-12-02','2015-12-03','2015-12-04','2015-12-07','2015-12-08','2015-12-09','2015-12-10','2015-12-11','2015-12-14','2015-12-15',
 	'2015-12-16','2015-12-17','2015-12-18','2015-12-21','2015-12-22','2015-12-23','2015-12-24','2015-12-28','2015-12-29','2015-12-30','2015-12-31']
 
@@ -142,8 +142,8 @@ if __name__ == '__main__':
 
 	sentiment = pd.read_csv(sentiments) # spark.read.csv("file://" + sentiments)
 
-	stock_data = spark.read.csv("file://" + stocks) # parse_stock_data(sc,stocks)
-	tweet_data = spark.read.json("file://" + filename)
+	stock_data = spark.read.csv("hdfs://" + stocks) # parse_stock_data(sc,stocks)
+	tweet_data = spark.read.json("hdfs://" + filename)
 	train_tweets = assign_sentiment(sc,tweet_data,sentiment,days2015)
 
 	labels = get_stock_labels(stock_data) # calculates the difference field for stock dataframe
