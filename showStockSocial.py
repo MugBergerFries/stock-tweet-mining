@@ -4,12 +4,12 @@ import datetime
 import numpy as np
 
 dfStocks = pd.read_csv('StockData/HistoricalQuotesTSLA.csv')
-dfTweets2012 = pd.read_csv('ColumnTweets2012.csv')
-dfTweets2013 = pd.read_csv('ColumnTweets2013.csv')
-dfTweets2014 = pd.read_csv('ColumnTweets2014.csv')
-dfTweets2015 = pd.read_csv('ColumnTweets2015.csv')
-dfTweets2016 = pd.read_csv('ColumnTweets2016.csv')
-dfTweets2017 = pd.read_csv('ColumnTweets2017.csv')
+dfTweets2012 = pd.read_csv('StockData/ColumnTweets2012.csv')
+dfTweets2013 = pd.read_csv('StockData/ColumnTweets2013.csv')
+dfTweets2014 = pd.read_csv('StockData/ColumnTweets2014.csv')
+dfTweets2015 = pd.read_csv('StockData/ColumnTweets2015.csv')
+dfTweets2016 = pd.read_csv('StockData/ColumnTweets2016.csv')
+dfTweets2017 = pd.read_csv('StockData/ColumnTweets2017.csv')
 tweetDfs = {}
 tweetDfs['2012'] = dfTweets2012
 tweetDfs['2013'] = dfTweets2013
@@ -79,7 +79,7 @@ def plot_data(year):
     
     plt.legend(loc=0,fontsize=40)
     
-    plt.savefig('TweetVsStock'+year+'.png')
+    plt.savefig('Graphs/TweetVsStock'+year+'.png')
     plt.show()
 
 plot_data('2012')
