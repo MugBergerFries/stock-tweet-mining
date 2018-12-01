@@ -4,7 +4,19 @@ import datetime
 import numpy as np
 
 dfStocks = pd.read_csv('StockData/HistoricalQuotesTSLA.csv')
-dfTweets = pd.read_csv('ColumnTweets.csv')
+dfTweets2012 = pd.read_csv('ColumnTweets2012.csv')
+dfTweets2013 = pd.read_csv('ColumnTweets2013.csv')
+dfTweets2014 = pd.read_csv('ColumnTweets2014.csv')
+dfTweets2015 = pd.read_csv('ColumnTweets2015.csv')
+dfTweets2016 = pd.read_csv('ColumnTweets2016.csv')
+dfTweets2017 = pd.read_csv('ColumnTweets2017.csv')
+tweetDfs = {}
+tweetDfs['2012'] = dfTweets2012
+tweetDfs['2013'] = dfTweets2013
+tweetDfs['2014'] = dfTweets2014
+tweetDfs['2015'] = dfTweets2015
+tweetDfs['2016'] = dfTweets2016
+tweetDfs['2017'] = dfTweets2017
 
 stockdates = []
 stockclose = []
@@ -28,7 +40,7 @@ weeks = list(range(1,54))
 
 def getDatabyYear(values,dates,year,weeks):
     i = 0
-    data = [[] for _ in range(52)]
+    data = [[] for _ in range(53)]
     for item in values:
         if dates[i][0:4]==year:
             data[weeks[i]-1].append(item)
@@ -40,7 +52,8 @@ def getDatabyYear(values,dates,year,weeks):
 
 def plot_data(year):
     muskcounts = []
-    muskcounts = dfTweets[year].tolist()
+    df = tweetDfs[year]
+    muskcounts = df[year].tolist()
     
     stocklist = []
     stocklist = getDatabyYear(stockclose,stockdates,year,StockWeekList)
@@ -70,8 +83,8 @@ def plot_data(year):
     plt.show()
 
 plot_data('2012')
-#plot_data('2013')
-#plot_data('2014')
-#plot_data('2015')
-#plot_data('2016')
-#plot_data('2017')
+plot_data('2013')
+plot_data('2014')
+plot_data('2015')
+plot_data('2016')
+plot_data('2017')
