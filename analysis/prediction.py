@@ -76,7 +76,8 @@ class predict:
         for i in range(len(outputs)):
             for j in range(len(outputs[i])):
                 outputs[i][j] = round(outputs[i][j])
-        print(outputs)
+        with open('neural_network/evaluated_data.txt','w') as f:
+            f.write(str(outputs) + '\n')
 
 
         # Save the model to model.json and model.h5

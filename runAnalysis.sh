@@ -1,1 +1,1 @@
-python36 Stock.py
+python3 ./analysis/read_tesla.py
