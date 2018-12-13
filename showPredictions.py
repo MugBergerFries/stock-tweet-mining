@@ -4,49 +4,7 @@ import datetime
 import numpy as np
 
 # the evaluated prediction data
-e_data = [0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 1, 1, 0, 0,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 1, 0, 1, 0,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 0, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 1, 0, 1, 0,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 1, 0, 0, 0,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-1, 0, 0, 1, 0,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1,
-0, 1, 0, 0, 1]
+e_data = [0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 1, 1, 0, 0,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 1, 0, 1, 0,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 0, 0, 0, 1,0, 1, 0, 0, 1,1, 1, 0, 1, 0,0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 1, 0, 0, 0,0, 1, 0, 0, 1,0, 1, 0, 0, 1,1, 0, 0, 1, 0,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1,0, 1, 0, 0, 1]
 
 dfStocks = pd.read_csv('StockData/HistoricalQuotesTSLA.csv')
 
@@ -71,41 +29,61 @@ dfStocks['week'] = stockweeks
 StockWeekList = dfStocks['week'].tolist()
 weeks = list(range(1,54))
 
-# holidays to skip
-skip_dates = ['2017/02/21','2017/01/17','2017/01/03','2016/12/27','2016/11/25','2016/09/06','2016/07/05'] #all +1 day
-#President's day 2/20/2017, MLK 1/16/2017, New years 1/2/2017, christimas 12/26/2016, thanksgiving 11/24/2016, labor day 9/5/2016, 4th of july 7/4/2016
 
 # get all the stock data in this date range
 def getDatabyDateRange(dates,start_date,end_date):
     data = []
     locs = []
-    skip_locs = []
     go = False
     i=0
-    j=0
+    month_locs = []
     for d in dates:
         if d == start_date:
             go = True
         if go:
             data.append(d)
             locs.append(i)
-            if(d in skip_dates):
-                skip_locs.append(j+1)
-            j+=1
+            if d[5:]=='04/03':
+                month_locs.append(i)
+            if d[5:]=='03/01':
+                month_locs.append(i)
+            if d[5:]=='02/01':
+                month_locs.append(i)
+            if d[5:]=='01/03':
+                month_locs.append(i)
+            if d[5:]=='12/01':
+                month_locs.append(i)
+            if d[5:]=='11/01':
+                month_locs.append(i)
+            if d[5:]=='10/03':
+                month_locs.append(i)
+            if d[5:]=='09/01':
+                month_locs.append(i)
+            if d[5:]=='08/01':
+                month_locs.append(i)
+            if d[5:]=='07/01':
+                month_locs.append(i)
+            if d[5:]=='06/01':
+                month_locs.append(i)
         if d == end_date:
             go = False
         i+=1
-    return data, locs, skip_locs
+    return data, locs, month_locs
 
 # get the data
-start_date = '2017/03/31'
-end_date = '2016/06/06'
-data, locs, skip_locs = getDatabyDateRange(stockdates,start_date,end_date)
+start_date = '2017/04/03'
+end_date = '2016/05/26'
+data, locs, month_locs = getDatabyDateRange(stockdates,start_date,end_date)
 
-#update the evaluated data to delete holidays
-for e in range(0,len(e_data)):
-    if(e in skip_locs):
-        del e_data[e]
+month_names = ["April '17","March '17","February '17","January '17","December '16","November '16","October '16","September '16","August '16","July '16","June '16"]
+months = []
+q=0
+for l in locs:
+    if l in month_locs:
+        months.insert(0,month_names[q])
+        q+=1
+    else:
+        months.insert(0,"")
 
 # get the stock data for this range
 pred_stocks = []
@@ -120,9 +98,6 @@ for l in locs:
     else:
         actual_data.append(0)
 
-print(actual_data)
-print(e_data)
-
 same = 0
 notsame = 0
 pred_len = len(pred_stocks)
@@ -131,8 +106,8 @@ for i in range(0,pred_len):
         same+=1
     else:
         notsame+=1
-print(same)
-print(notsame)
+percent_correct = 100/pred_len*same
+print(percent_correct,'% correct')
 
 rightdates = []
 wrongdates = []
@@ -147,12 +122,17 @@ for i in range(0,pred_len):
         wrongpoints.append(pred_stocks[i])
 
 # show the data
-#f, pl1 = plt.subplots(figsize = (50,28))
-#f.suptitle("Predictions",fontsize=50),linewidth=7.0,label="Tesla Stock Price at Close"
 fig = plt.figure(1, figsize=(50, 28))
 ax1 = fig.add_subplot(111)
-ax1.plot(data,pred_stocks,color="blue")
-ax1.scatter(rightdates,rightpoints,color="green",linewidths=10)
-ax1.scatter(wrongdates,wrongpoints,color="red",linewidths=10)
-#plt.legend(loc=0,fontsize=40)
+ax1.plot(data,pred_stocks,color="blue",label="Stock Price at Close")
+ax1.scatter(rightdates,rightpoints,color="green",linewidths=10,label="Correct Prediction")
+ax1.scatter(wrongdates,wrongpoints,color="red",linewidths=10,label="Incorrect Prediction")
+ax1.set_title("Predictions of Stock Prices from Tweet Sentiments - "+"{:.2f}".format(percent_correct)+"% correct",fontsize=50)
+ax1.tick_params(axis = 'both', which = 'major', labelsize = 24)
+ax1.tick_params(axis = 'both', which = 'minor', labelsize = 16)
+ax1.set_ylabel("Stock Price ($)",fontsize=50)
+ax1.set_xlabel("Date",fontsize=50)
+ax1.legend(loc=0,fontsize=40)
+ax1.set_xticklabels(months)
+plt.savefig('Graphs/PredictionResults.png')
 plt.show()
