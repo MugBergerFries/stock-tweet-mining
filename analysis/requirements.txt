@@ -1,4 +1,4 @@
-tensorflow==1.6.0
+tensorflow==1.12.1
 numpy==1.14.2
 python_dateutil==2.7.5
 pandas==0.23.4
